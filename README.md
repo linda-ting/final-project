@@ -30,9 +30,9 @@ Here are a whole bunch of inspo images!
 - Ability for user to rotate block in space to see all sides (maybe by default slowly rotate over time?)
 
 #### Techniques:
-- ![Shape grammars](https://www.gamedev.net/tutorials/programming/engines-and-middleware/procedural-modeling-of-buildings-with-shape-grammars-r4596/)/L systems for building and road footprints
+- [Shape grammars](https://www.gamedev.net/tutorials/programming/engines-and-middleware/procedural-modeling-of-buildings-with-shape-grammars-r4596/)/L systems for building and road footprints
 - FBM/Perlin noise for adjusting building heights
-- ![Bloom](https://learnopengl.com/Advanced-Lighting/Bloom) for neon lighting effects
+- [Bloom](https://learnopengl.com/Advanced-Lighting/Bloom) for neon lighting effects
 
 #### Design:
 ![](img/diagram.jpg)

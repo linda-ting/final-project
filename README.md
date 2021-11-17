@@ -6,29 +6,52 @@ This is it! The culmination of your procedural graphics experience this semester
 Before submitting your first milestone, _you must get your project idea and scope approved by Rachel, Adam or a TA._
 
 ### Design Doc
-Start off by forking this repository. In your README, write a design doc to outline your project goals and implementation plan. It must include the following sections:
 
 #### Introduction
-- What motivates your project?
+I have tinkled a bit with music visualizers in the past, but only by using signals from the music directly to influence the visuals. Using some of the procedural techniques I have learned about and applied during the course to make a more robust and stylized visualizer would be very fun! :~)
 
 #### Goal
-- What do you intend to achieve with this project?
+I hope to create a mini synthwave, cyberpunk, retrofuture city visualizer, where cars drive by and buildings grow and collapse with the music. I would also like the user to be able to interact with and influence the visualizer in some way, whether it be tweaking parameters for noise generation or adjusting the color scheme.
 
 #### Inspiration/reference:
-- You must have some form of reference material for your final project. Your reference may be a research paper, a blog post, some artwork, a video, another class at Penn, etc.  
-- Include in your design doc links to and images of your reference material.
+Here are a whole bunch of inspo images!
+
+![](img/city1.jpeg)
+![](img/city2.jpeg)
+![](img/city3.jpeg)
+![](img/city4.jpeg)
+![](img/city5.jpeg)
+
 
 #### Specification:
-- Outline the main features of your project.
+- A main platform in the center of the screen representing a chunk of blocks in the city
+- Tile-based road generation with cars driving on them
+- Buildings generated using shape grammars that grow/shrink in size ovr time
+- Ability for user to rotate block in space to see all sides (maybe by default slowly rotate over time?)
 
 #### Techniques:
-- What are the main technical/algorithmic tools you’ll be using? Give an overview, citing specific papers/articles.
+- ![Shape grammars](https://www.gamedev.net/tutorials/programming/engines-and-middleware/procedural-modeling-of-buildings-with-shape-grammars-r4596/)/L systems for building and road footprints
+- FBM/Perlin noise for adjusting building heights
+- ![Bloom](https://learnopengl.com/Advanced-Lighting/Bloom) for neon lighting effects
 
 #### Design:
-- How will your program fit together? Make a simple free-body diagram illustrating the pieces.
+![](img/diagram.jpg)
 
 #### Timeline:
-- Create a week-by-week set of milestones for each person in your group. Make sure you explicitly outline what each group member's duties will be.
+- Week 1: 
+  - Set up city block platform
+  - Set up basic rendering pipeline (using Lambertian shading, single light source)
+  - Complete road generation
+  - Set up building footprint generation
+- Week 2: 
+  - Complete building animation 
+  - Add camera animation
+  - Bug fixes
+- Week 3: 
+  - Beautifying!
+  - Enhance shaders
+  - Customize lighting setup
+  - Stylize colors
 
 Submit your Design doc as usual via pull request against this repository.
 ## Milestone 2: Implementation part 1 (due 11/22)

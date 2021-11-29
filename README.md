@@ -20,7 +20,7 @@ Here are a whole bunch of inspo images!
 ### Specification:
 - A main platform in the center of the screen representing a chunk of blocks in the city
 - Tile-based road generation with cars driving on them
-- Buildings generated using shape grammars that grow/shrink in size ovr time
+- Buildings generated using shape grammars that grow/shrink in size over time
 - Ability for user to rotate block in space to see all sides (maybe by default slowly rotate over time?)
 
 ### Techniques:

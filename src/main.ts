@@ -1,7 +1,9 @@
 import {mat4, quat, vec3} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
+import * as THREE from 'three';
 import Cylinder from './geometry/Cylinder';
+import Cube from './geometry/Cube';
 import Mesh from './geometry/Mesh';
 import ScreenQuad from './geometry/ScreenQuad';
 import Square from './geometry/Square';
@@ -10,6 +12,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import LSystem from './lsystem/LSystem'
+import RoadNetwork from './roads/RoadNetwork';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -19,6 +22,13 @@ const controls = {
   angle: 16
 };
 
+let loader: THREE.AudioLoader = new THREE.AudioLoader();
+let listener: THREE.AudioListener = new THREE.AudioListener();
+let audio: THREE.Audio = new THREE.Audio(listener);
+let fftSize: number = 64;
+let analyzer: THREE.AudioAnalyser;
+
+let cube: Cube;
 let square: Square;
 let screenQuad: ScreenQuad;
 let cylinder: Cylinder;
@@ -26,6 +36,17 @@ let leaf: Mesh;
 let banana: Mesh;
 let lsystem: LSystem;
 let time: number = 0.0;
+
+function loadSong(filename: string): any {
+  loader.load(filename, function (buffer: any) {
+    audio.setBuffer(buffer);
+    audio.setLoop(true);
+    audio.play();
+  });
+
+  analyzer = new THREE.AudioAnalyser(audio, fftSize);
+  return analyzer.getFrequencyData();
+}
 
 function readObj(filename: string) : string {
   var outstr = "";
@@ -67,34 +88,32 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  // Set up instanced rendering data arrays here.
-  // This example creates a set of positional
-  // offsets and gradiated colors for a 100x100 grid
-  // of squares, even though the VBO data for just
-  // one square is actually passed to the GPU
+  let roads: RoadNetwork = new RoadNetwork(5, 1, square);
+  roads.log();
+  roads.render();
+
+  /*
+  cube = new Cube(vec3.fromValues(0, 0, 0), 2);
+  cube.create();
+
   let offsetsArray = [];
   let colorsArray = [];
-  let n: number = 100.0;
-  for(let i = 0; i < n; i++) {
-    for(let j = 0; j < n; j++) {
-      offsetsArray.push(i);
-      offsetsArray.push(j);
-      offsetsArray.push(0);
+  let n: number = 1;
 
-      colorsArray.push(i / n);
-      colorsArray.push(j / n);
-      colorsArray.push(1.0);
-      colorsArray.push(1.0); // Alpha channel
-    }
+  for (let i = 0; i < n; i++) {
+    offsetsArray.push(i, i, 0);
+    colorsArray.push(1.0, 1.0, 1.0, 1.0);
   }
 
   let offsets: Float32Array = new Float32Array(offsetsArray);
   let colors: Float32Array = new Float32Array(colorsArray);
   square.setInstanceVBOs(offsets, colors);
-  square.setNumInstances(n * n); // grid of "particles"
+  square.setNumInstances(n);*/
 }
 
 function main() {
+  loadSong('music/zombie.mp3');
+
   // Initial display for framerate
   const stats = Stats();
   stats.setMode(0);
@@ -138,10 +157,10 @@ function main() {
   gl.enable(gl.DEPTH_TEST);
 
   // Initial call to load scene
-  //loadScene();
-  loadLSystem();
+  loadScene();
+  //loadLSystem();
 
-  const camera = new Camera(vec3.fromValues(0, 20, 40), vec3.fromValues(0, 18, 0));
+  const camera = new Camera(vec3.fromValues(0, 5, 15), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.9, 0.72, 0, 1);
@@ -165,7 +184,7 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     renderer.render(camera, flat, [screenQuad]);
-    renderer.render(camera, instancedShader, [cylinder, leaf, banana]);
+    renderer.render(camera, instancedShader, [square]);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

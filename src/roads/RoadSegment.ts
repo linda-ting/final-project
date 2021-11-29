@@ -5,7 +5,7 @@ export default class RoadSegment {
   end: vec2 = vec2.create();
   direction: vec2 = vec2.create();
 
-  width: number = 0.1;
+  width: number = 0.3;
 
   constructor(start: vec2, dir: vec2) {
     this.start = start;

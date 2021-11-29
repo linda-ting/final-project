@@ -87,15 +87,19 @@ function loadLSystem() {
 function loadScene() {
   square = new Square();
   square.create();
+  cube = new Cube(vec3.fromValues(0, 0, 0), 1);
+  cube.create();
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
   let roads: RoadNetwork = new RoadNetwork(5, 1, square);
-  roads.log();
+  //roads.log();
   roads.render();
 
-  let city: City = new City(vec3.fromValues(0, 0, 0), 5, 1);
+  let city: City = new City(vec3.fromValues(0, 0, 0), 5, 1, cube);
   city.setSongData(songData);
+  city.render();
+  city.log();
 
   /*
   cube = new Cube(vec3.fromValues(0, 0, 0), 2);
@@ -165,7 +169,7 @@ function main() {
   loadScene();
   //loadLSystem();
 
-  const camera = new Camera(vec3.fromValues(0, 5, 15), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(3, 7, 8), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.9, 0.72, 0, 1);
@@ -189,7 +193,7 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     renderer.render(camera, flat, [screenQuad]);
-    renderer.render(camera, instancedShader, [square]);
+    renderer.render(camera, instancedShader, [square, cube]);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

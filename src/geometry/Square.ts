@@ -5,6 +5,7 @@ import {gl} from '../globals';
 class Square extends Drawable {
   indices: Uint32Array;
   positions: Float32Array;
+  normals: Float32Array;
   colors: Float32Array;
   offsets: Float32Array; // Data for bufTranslate
   transform1: Float32Array;
@@ -23,9 +24,14 @@ class Square extends Drawable {
                                       0.5, 0, -0.5, 1,
                                       0.5, 0, 0.5, 1,
                                      -0.5, 0, 0.5, 1]);
+    this.normals = new Float32Array([0, 1, 0, 0,
+                                     0, 1, 0, 0,
+                                     0, 1, 0, 0,
+                                     0, 1, 0, 0]);
 
     this.generateIdx();
     this.generatePos();
+    this.generateNor();
     this.generateCol();
     this.generateTransform1();
     this.generateTransform2();
@@ -36,6 +42,9 @@ class Square extends Drawable {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufIdx);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.bufNor);
+    gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.STATIC_DRAW);
+    
     gl.bindBuffer(gl.ARRAY_BUFFER, this.bufPos);
     gl.bufferData(gl.ARRAY_BUFFER, this.positions, gl.STATIC_DRAW);
 

@@ -21,7 +21,7 @@ export default class RoadNetwork {
 
   constructor(side: number, gridSize: number, square: Square) {
     this.side = side;
-    this.maxIndex = side / gridSize
+    this.maxIndex = side / gridSize;
     this.gridSize = gridSize;
     this.square = square;
 
@@ -56,7 +56,7 @@ export default class RoadNetwork {
     queue.set(2, new RoadSegment(start3, dir3));
 
     let start4: vec2 = vec2.fromValues(this.maxIndex, 0);
-    let dir4: vec2 = vec2.fromValues(-1, 0);
+    let dir4: vec2 = vec2.fromValues(0, 1);
     queue.set(3, new RoadSegment(start4, dir4));
 
     while (queue.size > 0) {
@@ -119,7 +119,7 @@ export default class RoadNetwork {
       this.quadTransfArrY.push(transform[4], transform[5], transform[6], transform[7]);
       this.quadTransfArrZ.push(transform[8], transform[9], transform[10], transform[11]);
       this.quadTransfArrW.push(transform[12], transform[13], transform[14], transform[15]);
-      this.quadColorArr.push(0.3, 0.3, 0.3, 1);
+      this.quadColorArr.push(0.2, 0.1, 0.2, 1);
       this.numQuad++;
     }
 

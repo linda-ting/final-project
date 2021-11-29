@@ -13,6 +13,7 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import LSystem from './lsystem/LSystem'
 import RoadNetwork from './roads/RoadNetwork';
+import City from './City';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -27,6 +28,7 @@ let listener: THREE.AudioListener = new THREE.AudioListener();
 let audio: THREE.Audio = new THREE.Audio(listener);
 let fftSize: number = 64;
 let analyzer: THREE.AudioAnalyser;
+let songData: Uint8Array;
 
 let cube: Cube;
 let square: Square;
@@ -37,7 +39,7 @@ let banana: Mesh;
 let lsystem: LSystem;
 let time: number = 0.0;
 
-function loadSong(filename: string): any {
+function loadSong(filename: string) {
   loader.load(filename, function (buffer: any) {
     audio.setBuffer(buffer);
     audio.setLoop(true);
@@ -45,7 +47,7 @@ function loadSong(filename: string): any {
   });
 
   analyzer = new THREE.AudioAnalyser(audio, fftSize);
-  return analyzer.getFrequencyData();
+  songData = analyzer.getFrequencyData();
 }
 
 function readObj(filename: string) : string {
@@ -91,6 +93,9 @@ function loadScene() {
   let roads: RoadNetwork = new RoadNetwork(5, 1, square);
   roads.log();
   roads.render();
+
+  let city: City = new City(vec3.fromValues(0, 0, 0), 5, 1);
+  city.setSongData(songData);
 
   /*
   cube = new Cube(vec3.fromValues(0, 0, 0), 2);

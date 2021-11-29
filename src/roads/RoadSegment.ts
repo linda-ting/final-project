@@ -16,36 +16,27 @@ export default class RoadSegment {
   getNext() : Map<number, RoadSegment> {
     let out: Map<number, RoadSegment> = new Map();
 
-    if (Math.random() > 0.5 && 
-        !vec2.equals(this.direction, vec2.fromValues(0, -1))) {
-      let forward: vec2 = vec2.fromValues(0, 1);
-      let segment: RoadSegment = new RoadSegment(vec2.clone(this.end), vec2.clone(forward));
-      out.set(0, segment);
-      console.log("adding forward");
+    // most likely for road to continue in same direction
+    let segment: RoadSegment = new RoadSegment(vec2.clone(this.end), vec2.clone(this.direction));
+    out.set(0, segment);
+
+    var newDir;
+    if (this.direction[0] != 0) {
+      // turn to +/- z direction
+      newDir = vec2.fromValues(0, 1);
+    } else {
+      // turn to +/- x direction
+      newDir = vec2.fromValues(1, 0);
     }
 
-    if (Math.random() > 0.5 && 
-        !vec2.equals(this.direction, vec2.fromValues(-1, 0))) {
-      let right: vec2 = vec2.fromValues(1, 0);
-      let segment: RoadSegment = new RoadSegment(vec2.clone(this.end), vec2.clone(right));
-      out.set(1, segment);
-      console.log("adding right");
+    let p1 = Math.random();
+    if (p1 > 0.2) {
+      out.set(1, new RoadSegment(vec2.clone(this.end), vec2.clone(newDir)));
     }
 
-    if (Math.random() > 0.5 &&
-        !vec2.equals(this.direction, vec2.fromValues(1, 0))) {
-      let left: vec2 = vec2.fromValues(-1, 0);
-      let segment: RoadSegment = new RoadSegment(vec2.clone(this.end), vec2.clone(left));
-      out.set(2, segment);
-      console.log("adding left");
-    }
-
-    if (Math.random() > 0.5 && 
-        !vec2.equals(this.direction, vec2.fromValues(0, 1))) {
-      let backward: vec2 = vec2.fromValues(0, -1);
-      let segment: RoadSegment = new RoadSegment(vec2.clone(this.end), vec2.clone(backward));
-      out.set(3, segment);
-      console.log("adding backward");
+    let p2 = Math.random();
+    if (p2 > 0.2) {
+      out.set(2, new RoadSegment(vec2.clone(this.end), vec2.fromValues(-newDir[0], -newDir[1])));
     }
 
     return out;

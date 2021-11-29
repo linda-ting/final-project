@@ -9,8 +9,7 @@ export default class RoadNetwork {
   side: number;
   gridSize: number;
   grid: number[][] = [];
-  min: number;
-  max: number;
+  maxIndex: number;
 
   square: Square;
   quadTransfArrX: number[] = [];
@@ -22,8 +21,7 @@ export default class RoadNetwork {
 
   constructor(side: number, gridSize: number, square: Square) {
     this.side = side;
-    this.min = -side / 2.0;
-    this.max = -side / 2.0;
+    this.maxIndex = side / gridSize
     this.gridSize = gridSize;
     this.square = square;
 
@@ -44,10 +42,22 @@ export default class RoadNetwork {
     this.roads = [];
     let queue: Map<number, RoadSegment> = new Map();
 
-    // add single road segment
-    let start: vec2 = vec2.fromValues(0, 0);
-    let dir: vec2 = vec2.fromValues(0, 1);
-    queue.set(0, new RoadSegment(start, dir));
+    // add starter road segments
+    let start1: vec2 = vec2.fromValues(0, 0);
+    let dir1: vec2 = vec2.fromValues(0, 1);
+    queue.set(0, new RoadSegment(start1, dir1));
+
+    let start2: vec2 = vec2.fromValues(this.maxIndex, this.maxIndex);
+    let dir2: vec2 = vec2.fromValues(-1, 0);
+    queue.set(1, new RoadSegment(start2, dir2));
+
+    let start3: vec2 = vec2.fromValues(1, this.maxIndex);
+    let dir3: vec2 = vec2.fromValues(0, -1);
+    queue.set(2, new RoadSegment(start3, dir3));
+
+    let start4: vec2 = vec2.fromValues(this.maxIndex, 0);
+    let dir4: vec2 = vec2.fromValues(-1, 0);
+    queue.set(3, new RoadSegment(start4, dir4));
 
     while (queue.size > 0) {
       // remove highest priority segment
@@ -63,8 +73,6 @@ export default class RoadNetwork {
       if (!this.isValidSegment(segment)) continue;
 
       // add road if valid
-      console.log("adding segment");
-      console.log(segment.start + " " + segment.end);
       this.add(segment);
 
       // add new possible road segments
@@ -81,13 +89,13 @@ export default class RoadNetwork {
   }
 
   isValidSegment(segment: RoadSegment): boolean {
-    if (segment.start[0] < -this.side / 2 || segment.start[0] > this.side / 2 ||
-        segment.start[1] < -this.side / 2 || segment.start[1] > this.side / 2) {
+    if (segment.start[0] < 0 || segment.start[0] > this.maxIndex ||
+        segment.start[1] < 0 || segment.start[1] > this.maxIndex) {
       return false;
     }
 
-    if (segment.end[0] < -this.side / 2 || segment.end[0] > this.side / 2 ||
-        segment.end[1] < -this.side / 2 || segment.end[1] > this.side / 2) {
+    if (segment.end[0] < 0 || segment.end[0] > this.maxIndex ||
+        segment.end[1] < 0 || segment.end[1] > this.maxIndex) {
     return false;
     }
 

@@ -20,7 +20,8 @@ import City from './City';
 const controls = {
   numIter: 5,
   axiom: "FFFFFFFFF^++A[//------FF++++B]-&&A///^^^A++",
-  angle: 16
+  angle: 16,
+  play: false
 };
 
 let loader: THREE.AudioLoader = new THREE.AudioLoader();
@@ -29,6 +30,9 @@ let audio: THREE.Audio = new THREE.Audio(listener);
 let fftSize: number = 64;
 let analyzer: THREE.AudioAnalyser;
 let songData: Uint8Array;
+
+let city: City;
+let roads: RoadNetwork;
 
 let cube: Cube;
 let square: Square;
@@ -43,7 +47,6 @@ function loadSong(filename: string) {
   loader.load(filename, function (buffer: any) {
     audio.setBuffer(buffer);
     audio.setLoop(true);
-    audio.play();
   });
 
   analyzer = new THREE.AudioAnalyser(audio, fftSize);
@@ -92,13 +95,13 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  let roads: RoadNetwork = new RoadNetwork(5, 1, square);
+  roads = new RoadNetwork(5, 1, square);
   //roads.log();
   roads.render();
 
-  let city: City = new City(vec3.fromValues(0, 0, 0), 5, 1, cube);
-  city.setSongData(songData);
-  city.render();
+  city = new City(vec3.fromValues(0, 0, 0), 5, 1, cube);
+  city.setSongAnalyzer(analyzer);
+  city.update(0);
   city.log();
 
   /*
@@ -154,6 +157,14 @@ function main() {
     lsystem.redraw();
   });
 
+  const playControl = gui.add(controls, 'play', false);
+  playControl.onChange(function() {
+    audio.play();  
+    city.setSongAnalyzer(analyzer);
+    city.update(0);
+  })
+
+
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
@@ -192,6 +203,9 @@ function main() {
     flat.setTime(time++);
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
+
+    city.update(time);
+
     renderer.render(camera, flat, [screenQuad]);
     renderer.render(camera, instancedShader, [square, cube]);
     stats.end();

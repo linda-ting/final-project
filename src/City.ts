@@ -7,10 +7,15 @@ export default class City {
   center: vec3;
   //buildings: LSystem;
   buildings: Building[][] = [];
-  freqData: Uint8Array;
+
   side: number;
   gridSize: number;
   maxIndex: number;
+
+  freqData: Uint8Array;
+  songAnalyzer: THREE.AudioAnalyser;
+  songFreq: Uint8Array;
+  fftSize: number = 64;
 
   cube: Cube;
   cubeTransfArrX: number[] = [];
@@ -58,11 +63,27 @@ export default class City {
 
   }
 
-  setSongData(freq: Uint8Array) {
-    this.freqData = freq;
+  setSongAnalyzer(analyzer: THREE.AudioAnalyser) {
+    this.songAnalyzer = analyzer;
   }
 
-  render() {
+  setSongFreq(freq: Uint8Array) {
+    this.songFreq = freq;
+  }
+
+  update(time: number) {
+    // get latest frequency data
+    if (this.songAnalyzer == null) return;
+    this.songFreq = this.songAnalyzer.getFrequencyData();
+
+    // reset all
+    this.cubeTransfArrX = [];
+    this.cubeTransfArrY = [];
+    this.cubeTransfArrZ = [];
+    this.cubeTransfArrW = [];
+    this.cubeColorArr = [];
+    this.numCube = 0;
+
     // base
     let baseTransform: mat4 = mat4.create();
 
@@ -80,13 +101,14 @@ export default class City {
     this.cubeTransfArrZ.push(baseTransform[8], baseTransform[9], baseTransform[10], baseTransform[11]);
     this.cubeTransfArrW.push(baseTransform[12], baseTransform[13], baseTransform[14], baseTransform[15]);
     this.cubeColorArr.push(0.2, 0.9, 0.9, 1);
-    this.numCube = 1;
+    this.numCube++;
 
     // buildings
     for (var i = 0; i < this.maxIndex; i++) {
       for (var j = 0; j < this.maxIndex; j++) {
         let building = this.buildings[i][j];
-        let transform: mat4 = building.getTransformation();
+        let freq = this.songFreq[i * this.maxIndex + j];
+        let transform: mat4 = building.getTransformation(freq, time);
         this.cubeTransfArrX.push(transform[0], transform[1], transform[2], transform[3]);
         this.cubeTransfArrY.push(transform[4], transform[5], transform[6], transform[7]);
         this.cubeTransfArrZ.push(transform[8], transform[9], transform[10], transform[11]);

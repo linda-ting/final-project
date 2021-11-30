@@ -30,12 +30,12 @@ export default class RoadSegment {
     }
 
     let p1 = Math.random();
-    if (p1 > 0.2) {
+    if (p1 > 0.7) {
       out.set(1, new RoadSegment(vec2.clone(this.end), vec2.clone(newDir)));
     }
 
     let p2 = Math.random();
-    if (p2 > 0.2) {
+    if (p2 > 0.7) {
       out.set(2, new RoadSegment(vec2.clone(this.end), vec2.fromValues(-newDir[0], -newDir[1])));
     }
 

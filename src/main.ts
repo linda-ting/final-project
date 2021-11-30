@@ -96,7 +96,7 @@ function loadScene() {
   screenQuad.create();
 
   roads = new RoadNetwork(5, 1, square);
-  //roads.log();
+  roads.log();
   roads.render();
 
   city = new City(vec3.fromValues(0, 0, 0), 5, 1, cube);

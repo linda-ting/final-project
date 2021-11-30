@@ -26,12 +26,11 @@ export default class Building {
 
     // scale
     let scale: mat4 = mat4.create();
-    let height = freq * this.dimensions[1] / 255.0;
-    //let height = Math.cos(time);
+    let f = this.gain(freq / 255.0, 0.2);
+    let height = f * this.dimensions[1] + 0.5;
     mat4.scale(scale, scale, vec3.fromValues(this.dimensions[0], 
                                              height,
                                              this.dimensions[2]));
-    if (height > 0) console.log(height, scale);
 
     // rotate
     let rotation: mat4 = mat4.create();
@@ -47,5 +46,18 @@ export default class Building {
     mat4.multiply(transform, rotation, scale);
     mat4.multiply(transform, translation, transform);
     return transform;
+  }
+
+  bias(time: number, bias: number)
+  {
+    return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
+  }
+
+  gain(time: number, gain: number)
+  {
+    if(time < 0.5)
+      return this.bias(time * 2.0, gain) / 2.0;
+    else
+      return this.bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
   }
 }

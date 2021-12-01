@@ -16,7 +16,7 @@ export default class RoadSegment {
   getNext() : Map<number, RoadSegment> {
     let out: Map<number, RoadSegment> = new Map();
 
-    // most likely for road to continue in same direction
+    // road continues in same direction
     let segment: RoadSegment = new RoadSegment(vec2.clone(this.end), vec2.clone(this.direction));
     out.set(0, segment);
 
@@ -67,5 +67,11 @@ export default class RoadSegment {
     mat4.multiply(transform, rotation, scale);
     mat4.multiply(transform, translation, transform);
     return transform;
+  }
+
+  equals(start: vec2, end: vec2): boolean {
+    if (vec2.equals(this.start, start) && vec2.equals(this.end, end)) return true;
+    if (vec2.equals(this.start, end) && vec2.equals(this.end, start)) return true;
+    return false;
   }
 }

@@ -1,12 +1,14 @@
 import {vec3, vec2, mat4} from 'gl-matrix';
-import LSystem from './lsystem/LSystem';
 import Building from './Buildings/Building';
 import Cube from './geometry/Cube';
+import Square from './geometry/Square';
+import RoadNetwork from './roads/RoadNetwork';
 
 export default class City {
   center: vec3;
-  //buildings: LSystem;
   buildings: Building[][] = [];
+  roads: RoadNetwork;
+  roadWidth: number = 0.3;
 
   side: number;
   gridSize: number;
@@ -25,18 +27,23 @@ export default class City {
   cubeColorArr: number[] = [];
   numCube: number = 0;
 
-  roadWidth: number = 0.3;
+  square: Square;
 
-  constructor(center: vec3, side: number, gridSize: number, cube: Cube) {
+
+  constructor(center: vec3, side: number, gridSize: number, cube: Cube, square: Square) {
     this.center = center;
     this.side = side;
     this.gridSize = gridSize;
     this.maxIndex = side / gridSize;
     this.cube = cube;
+    this.square = square;
 
-    // TODO create roads
+    // create roads
+    this.roads = new RoadNetwork(side, gridSize, square);
+    this.roads.render();
+    this.roads.log();
 
-    // TODO create buildings
+    // create buildings
     this.init();
   }
 
@@ -93,6 +100,60 @@ export default class City {
         this.buildings[i][j] = new Building(vec3.clone(corner), vec3.clone(dims));
       }
     }
+
+    // merge buildings if possible
+    var i = 0;
+    var j = 0;
+    /*
+    while (i < this.maxIndex) {
+      while (j < this.maxIndex) {*/
+    for(var i = 0; i < this.maxIndex; i++) {
+      for (var j = 0; j < this.maxIndex; j++) {
+        let building = this.buildings[i][j];
+        if (building == null) continue;
+
+        let xSize: number = 1;
+        let zSize: number = 1;
+
+        // expand in x direction
+        while (true && xSize < this.maxIndex - i && zSize < this.maxIndex - i) {
+          /*for (var x = 0; x < xSize; x++) {
+            for (var z = 0; z < zSize; z++) {
+
+            }
+          }*/
+
+          let start: vec2 = vec2.fromValues(i + xSize, j);
+          let end: vec2 = vec2.fromValues(i + xSize, j + 1);
+          //console.log("checking if road ", i + xExpand, j, " to ", i + xExpand, j + 1, "exists");
+          if (!this.roads.exists(start, end)) {
+            xSize++
+          } else {
+            break;
+          }
+        }
+
+        // expand building footprint
+        let newWidth = xSize * this.gridSize - 0.4;
+        let newDepth = zSize * this.gridSize - 0.4;
+        this.buildings[i][j].setFootprint(newWidth, newDepth);
+
+        console.log("expanded building", i, j, " by ", xSize, zSize);
+
+        // erase overlapped buildings
+        if (xSize > 1 || zSize > 1) {
+          for (var x = 0; x < xSize; x++) {
+            for (var z = 0; z < zSize; z++) {
+              if (x == 0 && z == 0) continue;
+              this.buildings[i + x][j + z] = null;
+
+              //console.log("x", x, "z", z);
+              //console.log("erasing building", i + x, j + z, "bc of expanded" , i, j);
+            }
+          }
+        }
+      }
+    }
   }
 
   reset() {
@@ -124,11 +185,11 @@ export default class City {
     let baseTransform: mat4 = mat4.create();
 
     let scale: mat4 = mat4.create();
-    mat4.scale(scale, scale, vec3.fromValues(this.side + this.roadWidth, 0.2, this.side + this.roadWidth));
+    mat4.scale(scale, scale, vec3.fromValues(this.side + this.roadWidth, 0.4, this.side + this.roadWidth));
 
     let translation: mat4 = mat4.create();
     mat4.fromTranslation(translation, vec3.fromValues(this.center[0],
-                                                      this.center[1] - 0.1 - 0.01,
+                                                      this.center[1] - 0.2 - 0.01,
                                                       this.center[2]));
 
     mat4.multiply(baseTransform, translation, scale);
@@ -143,13 +204,15 @@ export default class City {
     for (var i = 0; i < this.maxIndex; i++) {
       for (var j = 0; j < this.maxIndex; j++) {
         let building = this.buildings[i][j];
+        if (building == null) continue;
+
         let freq = this.songFreq[i * this.maxIndex + j];
         let transform: mat4 = building.getTransformation(freq, time);
         this.cubeTransfArrX.push(transform[0], transform[1], transform[2], transform[3]);
         this.cubeTransfArrY.push(transform[4], transform[5], transform[6], transform[7]);
         this.cubeTransfArrZ.push(transform[8], transform[9], transform[10], transform[11]);
         this.cubeTransfArrW.push(transform[12], transform[13], transform[14], transform[15]);
-        this.cubeColorArr.push(0.8, 1.0, 0.3, 1);
+        this.cubeColorArr.push(1.5 * i / this.maxIndex, 1.5 * j / this.maxIndex, 1, 1);
         this.numCube++;
       }
     }

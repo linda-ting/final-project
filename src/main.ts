@@ -27,7 +27,7 @@ const controls = {
 let loader: THREE.AudioLoader = new THREE.AudioLoader();
 let listener: THREE.AudioListener = new THREE.AudioListener();
 let audio: THREE.Audio = new THREE.Audio(listener);
-let fftSize: number = 64;
+let fftSize: number = 128;
 let analyzer: THREE.AudioAnalyser;
 let songData: Uint8Array;
 
@@ -95,11 +95,7 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  roads = new RoadNetwork(5, 1, square);
-  roads.log();
-  roads.render();
-
-  city = new City(vec3.fromValues(0, 0, 0), 5, 1, cube);
+  city = new City(vec3.fromValues(0, 0, 0), 3, 1, cube, square);
   city.setSongAnalyzer(analyzer);
   city.update(0);
   city.log();

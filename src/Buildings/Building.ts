@@ -21,6 +21,11 @@ export default class Building {
     // TODO
   }
 
+  setFootprint(width: number, depth: number) {
+    this.dimensions[0] = width;
+    this.dimensions[2] = depth;
+  }
+
   getTransformation(freq: number, time: number) {
     let transform: mat4 = mat4.create();
 

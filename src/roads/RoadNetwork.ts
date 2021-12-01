@@ -47,15 +47,15 @@ export default class RoadNetwork {
     let dir1: vec2 = vec2.fromValues(0, 1);
     queue.set(-16, new RoadSegment(start1, dir1));
 
-    let start2: vec2 = vec2.fromValues(this.maxIndex, this.maxIndex);
-    let dir2: vec2 = vec2.fromValues(-1, 0);
+    let start2: vec2 = vec2.fromValues(0, 0);
+    let dir2: vec2 = vec2.fromValues(1, 0);
     queue.set(-12, new RoadSegment(start2, dir2));
 
-    let start3: vec2 = vec2.fromValues(1, this.maxIndex);
-    let dir3: vec2 = vec2.fromValues(0, -1);
+    let start3: vec2 = vec2.fromValues(this.maxIndex, 0);
+    let dir3: vec2 = vec2.fromValues(0, 1);
     queue.set(-8, new RoadSegment(start3, dir3));
 
-    let start4: vec2 = vec2.fromValues(this.maxIndex, 0);
+    let start4: vec2 = vec2.fromValues(0, this.maxIndex);
     let dir4: vec2 = vec2.fromValues(1, 0);
     queue.set(-4, new RoadSegment(start4, dir4));
 
@@ -67,10 +67,12 @@ export default class RoadNetwork {
       queue.delete(key);
       
       // check validity of segment
-      if (!this.isValidSegment(segment)) continue;
+      if (!this.isValidSegment(segment)) {
+        continue;
+      }
 
       // add road if valid
-      this.add(segment);
+      this.roads.push(segment);
 
       // add new possible road segments
       let newSegments: Map<number, RoadSegment> = segment.getNext();
@@ -79,10 +81,6 @@ export default class RoadNetwork {
         queue.set(key + newKey + 1, newSeg);
       }
     }
-  }
-
-  add(segment: RoadSegment) {
-    this.roads.push(segment);
   }
 
   isValidSegment(segment: RoadSegment): boolean {
@@ -98,11 +96,7 @@ export default class RoadNetwork {
 
     for (var i = 0; i < this.roads.length; i++) {
       let existing = this.roads[i];
-      if (vec2.equals(segment.start, existing.start) && vec2.equals(segment.end, existing.end)) {
-        return false;
-      } else if (vec2.equals(segment.start, existing.end) && vec2.equals(segment.end, existing.start)) {
-        return false;
-      }
+      if (existing.equals(segment.start, segment.end)) return false;
     }
 
     return true;
@@ -134,5 +128,13 @@ export default class RoadNetwork {
       let road = this.roads[i];
       console.log(i + ": " + road.start + " " + road.end);
     }
+  }
+
+  exists(start: vec2, end: vec2): boolean {
+    for (var i = 0; i < this.roads.length; i++) {
+      let road = this.roads[i];
+      if (road.equals(start, end)) return true;
+    }
+    return false;
   }
 }

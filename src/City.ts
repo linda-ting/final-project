@@ -8,7 +8,7 @@ export default class City {
   center: vec3;
   buildings: Building[][] = [];
   roads: RoadNetwork;
-  roadWidth: number = 0.3;
+  roadWidth: number = 0.2;
 
   side: number;
   gridSize: number;
@@ -84,8 +84,6 @@ export default class City {
   }
 
   init() {
-    // TODO
-
     // initialize buildings
     let centerIdx: number = this.maxIndex / 2.0;
     for (var i = 0; i < this.maxIndex; i++) {
@@ -117,20 +115,32 @@ export default class City {
 
         // expand in x direction
         while (true && xSize < this.maxIndex - i && zSize < this.maxIndex - i) {
-          /*for (var x = 0; x < xSize; x++) {
-            for (var z = 0; z < zSize; z++) {
-
+          let xExpand: boolean = true;
+          let zExpand: boolean = true;
+          
+          // check if can expand in z dir
+          for (var x = 0; x < xSize; x++) {
+            let start: vec2 = vec2.fromValues(i + x + xSize, j);
+            let end: vec2 = vec2.fromValues(i + x + xSize, j + 1);
+            if (this.roads.exists(start, end)) {
+              xExpand = false;
+              break;
             }
-          }*/
-
-          let start: vec2 = vec2.fromValues(i + xSize, j);
-          let end: vec2 = vec2.fromValues(i + xSize, j + 1);
-          //console.log("checking if road ", i + xExpand, j, " to ", i + xExpand, j + 1, "exists");
-          if (!this.roads.exists(start, end)) {
-            xSize++
-          } else {
-            break;
           }
+
+          // check if can expand in x dir
+          for (var z = 0; z < zSize; z++) {
+            let start: vec2 = vec2.fromValues(i, j + z + zSize);
+            let end: vec2 = vec2.fromValues(i + 1, j + z + zSize);
+            if (this.roads.exists(start, end)) {
+              zExpand = false;
+              break;
+            }
+          }
+
+          if (Math.random() < 0.5) break;
+          if (xExpand) xSize++;
+          if (zExpand) zSize++;
         }
 
         // expand building footprint
@@ -138,20 +148,20 @@ export default class City {
         let newDepth = zSize * this.gridSize - 0.4;
         this.buildings[i][j].setFootprint(newWidth, newDepth);
 
-        console.log("expanded building", i, j, " by ", xSize, zSize);
-
         // erase overlapped buildings
-        if (xSize > 1 || zSize > 1) {
-          for (var x = 0; x < xSize; x++) {
-            for (var z = 0; z < zSize; z++) {
-              if (x == 0 && z == 0) continue;
-              this.buildings[i + x][j + z] = null;
-
-              //console.log("x", x, "z", z);
-              //console.log("erasing building", i + x, j + z, "bc of expanded" , i, j);
-            }
+        if (xSize == 1 && zSize == 1) continue;
+        for (var x = 0; x < xSize; x++) {
+          for (var z = 0; z < zSize; z++) {
+            if (x == 0 && z == 0) continue;
+            this.buildings[i + x][j + z] = null;
+            //console.log("x", x, "z", z);
+            //console.log("erasing building", i + x, j + z, "bc of expanded" , i, j);
           }
         }
+
+        // TODO check for intersecting buildings
+
+        console.log("expanded building", i, j, " by ", xSize, zSize);
       }
     }
   }

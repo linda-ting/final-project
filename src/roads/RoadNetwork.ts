@@ -45,19 +45,23 @@ export default class RoadNetwork {
     // add starter road segments
     let start1: vec2 = vec2.fromValues(0, 0);
     let dir1: vec2 = vec2.fromValues(0, 1);
-    queue.set(-16, new RoadSegment(start1, dir1));
+    queue.set(-20, new RoadSegment(start1, dir1));
 
     let start2: vec2 = vec2.fromValues(0, 0);
     let dir2: vec2 = vec2.fromValues(1, 0);
-    queue.set(-12, new RoadSegment(start2, dir2));
+    queue.set(-16, new RoadSegment(start2, dir2));
 
     let start3: vec2 = vec2.fromValues(this.maxIndex, 0);
     let dir3: vec2 = vec2.fromValues(0, 1);
-    queue.set(-8, new RoadSegment(start3, dir3));
+    queue.set(-12, new RoadSegment(start3, dir3));
 
     let start4: vec2 = vec2.fromValues(0, this.maxIndex);
     let dir4: vec2 = vec2.fromValues(1, 0);
-    queue.set(-4, new RoadSegment(start4, dir4));
+    queue.set(-8, new RoadSegment(start4, dir4));
+
+    let start5: vec2 = vec2.fromValues(this.maxIndex, this.maxIndex);
+    let dir5: vec2 = vec2.fromValues(-1, 0);
+    queue.set(-4, new RoadSegment(start5, dir5));
 
     while (queue.size > 0) {
       // remove highest priority segment

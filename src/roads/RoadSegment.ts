@@ -5,12 +5,17 @@ export default class RoadSegment {
   end: vec2 = vec2.create();
   direction: vec2 = vec2.create();
 
-  width: number = 0.3;
+  width: number = 0.2;
 
   constructor(start: vec2, dir: vec2) {
     this.start = start;
     this.direction = dir;
     this.end = vec2.fromValues(start[0] + dir[0], start[1] + dir[1]);
+  }
+
+  noise(p: vec2): number {
+    let n = Math.abs((Math.sin(vec2.dot(p, vec2.fromValues(127.1, 311.7))) * 1288.002) % 1);
+    return n;
   }
 
   getNext() : Map<number, RoadSegment> {
@@ -29,13 +34,13 @@ export default class RoadSegment {
       newDir = vec2.fromValues(1, 0);
     }
 
-    let p1 = Math.random();
-    if (p1 > 0.7) {
+    let p = this.noise(this.start);
+
+    if (p > 0.5 && p < 0.75) {
       out.set(1, new RoadSegment(vec2.clone(this.end), vec2.clone(newDir)));
     }
 
-    let p2 = Math.random();
-    if (p2 > 0.7) {
+    if (p > 0.75 && p < 1.0) {
       out.set(2, new RoadSegment(vec2.clone(this.end), vec2.fromValues(-newDir[0], -newDir[1])));
     }
 

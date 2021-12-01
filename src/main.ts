@@ -95,7 +95,7 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  city = new City(vec3.fromValues(0, 0, 0), 3, 1, cube, square);
+  city = new City(vec3.fromValues(0, 0, 0), 6, 1, cube, square);
   city.setSongAnalyzer(analyzer);
   city.update(0);
   city.log();

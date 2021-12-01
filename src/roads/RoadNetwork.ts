@@ -56,7 +56,7 @@ export default class RoadNetwork {
     queue.set(-8, new RoadSegment(start3, dir3));
 
     let start4: vec2 = vec2.fromValues(this.maxIndex, 0);
-    let dir4: vec2 = vec2.fromValues(0, 1);
+    let dir4: vec2 = vec2.fromValues(1, 0);
     queue.set(-4, new RoadSegment(start4, dir4));
 
     while (queue.size > 0) {

@@ -27,7 +27,7 @@ export default class Building {
     // scale
     let scale: mat4 = mat4.create();
     let f = this.gain(freq / 255.0, 0.2);
-    let height = f * this.dimensions[1] + 0.5;
+    let height = f * 0.5 * this.dimensions[1] + this.dimensions[1];
     mat4.scale(scale, scale, vec3.fromValues(this.dimensions[0], 
                                              height,
                                              this.dimensions[2]));

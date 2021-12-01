@@ -1,4 +1,4 @@
-import {vec3, mat4} from 'gl-matrix';
+import {vec3, vec2, mat4} from 'gl-matrix';
 import LSystem from './lsystem/LSystem';
 import Building from './Buildings/Building';
 import Cube from './geometry/Cube';
@@ -40,17 +40,53 @@ export default class City {
     this.init();
   }
 
+  noise(p: vec2): number {
+    let n = Math.abs((Math.sin(vec2.dot(p, vec2.fromValues(127.1, 311.7))) * 1288.002) % 1);
+    return n;
+  }
+
+  interpNoise(x: number, y: number): number {
+    let intX = Math.floor(x);
+    let fractX = x % 1;
+    let intY = Math.floor(y);
+    let fractY = y % 1;
+  
+    let v1 = this.noise(vec2.fromValues(intX, intY));
+    let v2 = this.noise(vec2.fromValues(intX + 1, intY));
+    let v3 = this.noise(vec2.fromValues(intX, intY + 1));
+    let v4 = this.noise(vec2.fromValues(intX + 1, intY + 1));
+  
+    let i1 = v1 * fractX + v2 * (1.0 - fractX);
+    let i2 = v3 * fractX + v4 * (1.0 - fractX);
+    let out = i1 * fractY + i2 * (1.0 - fractY)
+    return out;
+  }
+
+  fbm(x: number, y: number) {
+    let total: number = 0;
+    let persistence: number = 0.72;
+    let octaves: number = 4;
+  
+    for(var i = 1; i <= octaves; i++) {
+      let freq = Math.pow(2, i);
+      let amp = Math.pow(persistence, i);
+      total += this.interpNoise(x * freq, y * freq) * amp;
+    }
+
+    return total;
+  }
+
   init() {
     // TODO
 
     // initialize buildings
-    let dims: vec3 = vec3.fromValues(this.gridSize - 0.4,
-                                     1,
-                                     this.gridSize - 0.4);
     let centerIdx: number = this.maxIndex / 2.0;
     for (var i = 0; i < this.maxIndex; i++) {
       this.buildings[i] = [];
       for (var j = 0; j < this.maxIndex; j++) {
+        let dims: vec3 = vec3.fromValues(this.gridSize - 0.4,
+                                         this.fbm(i, j),
+                                         this.gridSize - 0.4);
         let corner: vec3 = vec3.fromValues((i - centerIdx) * this.gridSize,
                                            0,
                                            (j - centerIdx) * this.gridSize);

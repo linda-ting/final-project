@@ -11,14 +11,19 @@ export default class Building {
   constructor(corner: vec3, dims: vec3) {
     this.corner = corner;
     this.dimensions = dims;
+    this.blocks.push(new BuildingBlock(this, corner, dims));
   }
 
   setRoadWidth(width: number) {
     Building.roadWidth = width;
   }
 
-  grow() {
+  expand(iter: number) {
     // TODO
+    for (var i = 0; i < this.blocks.length; i++) {
+      let block = this.blocks[i];
+      let newBlocks = block.expand();
+    }
   }
 
   setFootprint(width: number, depth: number) {
@@ -26,13 +31,17 @@ export default class Building {
     this.dimensions[2] = depth;
   }
 
+  addBlock(block: BuildingBlock) {
+    this.blocks.push(block);
+  }
+
   getTransformation(freq: number, time: number) {
     let transform: mat4 = mat4.create();
 
     // scale
     let scale: mat4 = mat4.create();
-    let f = this.gain(freq / 255.0, 0.2);
-    let height = f * 0.5 * this.dimensions[1] + this.dimensions[1];
+    let f = this.gain(freq / 255.0, 0.1);
+    let height = f * 0.6 * this.dimensions[1] + this.dimensions[1];
     mat4.scale(scale, scale, vec3.fromValues(this.dimensions[0], 
                                              height,
                                              this.dimensions[2]));

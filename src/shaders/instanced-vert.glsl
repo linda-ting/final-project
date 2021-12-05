@@ -2,6 +2,7 @@
 
 uniform mat4 u_ViewProj;
 uniform float u_Time;
+uniform float u_AvgFreq;
 
 uniform mat3 u_CameraAxes; // Used for rendering particles as billboards (quads that are always looking at the camera)
 // gl_Position = center + vs_Pos.x * camRight + vs_Pos.y * camUp;
@@ -21,13 +22,58 @@ out vec4 fs_Pos;
 out vec4 fs_Nor;
 out vec4 fs_LightVec;
 
-const vec4 lightPos = vec4(5, 15, 10, 1);
+const vec4 lightPos = vec4(5, 15, -10, 1);
+
+vec3 random3(vec3 p) {
+	return fract(sin(vec3(
+                    dot(p, vec3(127.1, 311.7, 99.2)),
+                    dot(p, vec3(269.5, 183.3, 77.9)),
+                    dot(p, vec3(381.8, 98.2, 149.4))))
+                 * 1.5);
+}
+
+float worley(vec3 p) {
+  p *= 60.0;
+  vec3 pInt = floor(p);
+  vec3 pFract = fract(p);
+  float minDist = 1.0;
+  
+  for (int z = -1; z <= 1; ++z) {
+    for (int y = -1; y <= 1; ++y) {
+        for (int x = -1; x <= 1; ++x) {
+            vec3 neighbor = vec3(float(x), float(y), float(z)); 
+            vec3 point = random3(pInt + neighbor);
+            vec3 diff = neighbor + point - pFract;
+            float dist = length(diff);
+            minDist = min(minDist, dist);
+        }
+    }
+  }
+  
+  return minDist;
+}
+
+float bias(float time, float bias) {
+  return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
+}
+
+float gain(float time, float gain) {
+  if(time < 0.5)
+    return bias(time * 2.0, gain) / 2.0;
+  else
+    return bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
+}
 
 void main()
 {
   // transform using input transformation
   mat4 transform = mat4(vs_Transform1, vs_Transform2, vs_Transform3, vs_Transform4);
   fs_Pos = transform * vs_Pos;
+
+  float xz = 0.4 * gain(u_AvgFreq / 255.0, 0.75) + 0.8;
+  float y = 0.5 * worley(fs_Pos.xxz) + 0.8;
+  fs_Pos = fs_Pos * vec4(vec3(xz, y, xz), 1.0);
+
   vec3 newNor = (transform * vs_Nor).xyz;
   fs_Nor = vec4(normalize(newNor), 1);
   fs_Col = vs_Col;

@@ -8,7 +8,7 @@ export default class City {
   center: vec3;
   buildings: Building[][] = [];
   roads: RoadNetwork;
-  roadWidth: number = 0.2;
+  roadWidth: number = 0.1;
 
   side: number;
   gridSize: number;
@@ -47,42 +47,6 @@ export default class City {
     this.init();
   }
 
-  noise(p: vec2): number {
-    let n = Math.abs((Math.sin(vec2.dot(p, vec2.fromValues(127.1, 311.7))) * 1288.002) % 1);
-    return n;
-  }
-
-  interpNoise(x: number, y: number): number {
-    let intX = Math.floor(x);
-    let fractX = x % 1;
-    let intY = Math.floor(y);
-    let fractY = y % 1;
-  
-    let v1 = this.noise(vec2.fromValues(intX, intY));
-    let v2 = this.noise(vec2.fromValues(intX + 1, intY));
-    let v3 = this.noise(vec2.fromValues(intX, intY + 1));
-    let v4 = this.noise(vec2.fromValues(intX + 1, intY + 1));
-  
-    let i1 = v1 * fractX + v2 * (1.0 - fractX);
-    let i2 = v3 * fractX + v4 * (1.0 - fractX);
-    let out = i1 * fractY + i2 * (1.0 - fractY)
-    return out;
-  }
-
-  fbm(x: number, y: number) {
-    let total: number = 0;
-    let persistence: number = 0.72;
-    let octaves: number = 4;
-  
-    for(var i = 1; i <= octaves; i++) {
-      let freq = Math.pow(2, i);
-      let amp = Math.pow(persistence, i);
-      total += this.interpNoise(x * freq, y * freq) * amp;
-    }
-
-    return total;
-  }
-
   init() {
     // initialize buildings
     let centerIdx: number = this.maxIndex / 2.0;
@@ -90,7 +54,7 @@ export default class City {
       this.buildings[i] = [];
       for (var j = 0; j < this.maxIndex; j++) {
         let dims: vec3 = vec3.fromValues(this.gridSize - 0.4,
-                                         this.fbm(i, j),
+                                         1.3 * this.gain(this.fbm(i, j), 0.55),
                                          this.gridSize - 0.4);
         let corner: vec3 = vec3.fromValues((i - centerIdx) * this.gridSize,
                                            0,
@@ -99,12 +63,7 @@ export default class City {
       }
     }
 
-    // merge buildings if possible
-    var i = 0;
-    var j = 0;
-    /*
-    while (i < this.maxIndex) {
-      while (j < this.maxIndex) {*/
+    // merge buildings
     for(var i = 0; i < this.maxIndex; i++) {
       for (var j = 0; j < this.maxIndex; j++) {
         let building = this.buildings[i][j];
@@ -113,8 +72,7 @@ export default class City {
         let xSize: number = 1;
         let zSize: number = 1;
 
-        // expand in x direction
-        while (true && xSize < this.maxIndex - i && zSize < this.maxIndex - i) {
+        while (true && xSize + i < this.maxIndex && zSize + j < this.maxIndex) {
           let xExpand: boolean = true;
           let zExpand: boolean = true;
           
@@ -164,6 +122,15 @@ export default class City {
         console.log("expanded building", i, j, " by ", xSize, zSize);
       }
     }
+
+    // expand buildings
+    for (var i = 0; i < this.maxIndex; i++) {
+      for (var j = 0; j < this.maxIndex; j++) {
+        let building = this.buildings[i][j];
+        if (building == null) continue;
+        building.expand(1);
+      }
+    }
   }
 
   reset() {
@@ -207,7 +174,7 @@ export default class City {
     this.cubeTransfArrY.push(baseTransform[4], baseTransform[5], baseTransform[6], baseTransform[7]);
     this.cubeTransfArrZ.push(baseTransform[8], baseTransform[9], baseTransform[10], baseTransform[11]);
     this.cubeTransfArrW.push(baseTransform[12], baseTransform[13], baseTransform[14], baseTransform[15]);
-    this.cubeColorArr.push(0.2, 0.9, 0.9, 1);
+    this.cubeColorArr.push(0.2, 0.2, 0.2, 1);
     this.numCube++;
 
     // buildings
@@ -238,5 +205,57 @@ export default class City {
 
   log() {
     console.log("num buildings: " + this.maxIndex * this.maxIndex);
+  }
+
+  noise(p: vec2): number {
+    let n = Math.abs((Math.sin(vec2.dot(p, vec2.fromValues(127.1, 311.7))) * 1288.002) % 1);
+    return n;
+  }
+
+  interpNoise(x: number, y: number): number {
+    let intX = Math.floor(x);
+    let fractX = x % 1;
+    let intY = Math.floor(y);
+    let fractY = y % 1;
+  
+    let v1 = this.noise(vec2.fromValues(intX, intY));
+    let v2 = this.noise(vec2.fromValues(intX + 1, intY));
+    let v3 = this.noise(vec2.fromValues(intX, intY + 1));
+    let v4 = this.noise(vec2.fromValues(intX + 1, intY + 1));
+  
+    let i1 = v1 * fractX + v2 * (1.0 - fractX);
+    let i2 = v3 * fractX + v4 * (1.0 - fractX);
+    let out = i1 * fractY + i2 * (1.0 - fractY)
+    return out;
+  }
+
+  fbm(x: number, y: number) {
+    x *= 10;
+    y *= 10;
+
+    let total: number = 0;
+    let persistence: number = 0.72;
+    let octaves: number = 4;
+  
+    for(var i = 1; i <= octaves; i++) {
+      let freq = Math.pow(2, i);
+      let amp = Math.pow(persistence, i);
+      total += this.interpNoise(x * freq, y * freq) * amp;
+    }
+
+    return total;
+  }
+
+  bias(time: number, bias: number)
+  {
+    return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
+  }
+
+  gain(time: number, gain: number)
+  {
+    if(time < 0.5)
+      return this.bias(time * 2.0, gain) / 2.0;
+    else
+      return this.bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
   }
 }

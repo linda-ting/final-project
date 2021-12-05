@@ -40,6 +40,7 @@ class ShaderProgram {
   unifEye: WebGLUniformLocation;
   unifUp: WebGLUniformLocation;
   unifDimensions: WebGLUniformLocation;
+  unifAvgFreq: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -69,6 +70,7 @@ class ShaderProgram {
     this.unifEye   = gl.getUniformLocation(this.prog, "u_Eye");
     this.unifRef   = gl.getUniformLocation(this.prog, "u_Ref");
     this.unifUp   = gl.getUniformLocation(this.prog, "u_Up");
+    this.unifAvgFreq = gl.getUniformLocation(this.prog, "u_AvgFreq");
   }
 
   use() {
@@ -130,6 +132,13 @@ class ShaderProgram {
     this.use();
     if (this.unifTime !== -1) {
       gl.uniform1f(this.unifTime, t);
+    }
+  }
+
+  setAvgFreq(f: number) {
+    this.use();
+    if (this.unifAvgFreq !== -1) {
+      gl.uniform1f(this.unifAvgFreq, f);
     }
   }
 

@@ -5,7 +5,7 @@ export default class RoadSegment {
   end: vec2 = vec2.create();
   direction: vec2 = vec2.create();
 
-  width: number = 0.2;
+  width: number = 0.1;
 
   constructor(start: vec2, dir: vec2) {
     this.start = start;
@@ -34,13 +34,14 @@ export default class RoadSegment {
       newDir = vec2.fromValues(1, 0);
     }
 
-    let p = this.noise(this.start);
-
-    if (p > 0.5 && p < 0.75) {
+    //let p = this.noise(this.start);
+    let p1 = Math.random();
+    if (p1 > 0.7) {
       out.set(1, new RoadSegment(vec2.clone(this.end), vec2.clone(newDir)));
     }
 
-    if (p > 0.75 && p < 1.0) {
+    let p2 = Math.random();
+    if (p2 > 0.7) {
       out.set(2, new RoadSegment(vec2.clone(this.end), vec2.fromValues(-newDir[0], -newDir[1])));
     }
 

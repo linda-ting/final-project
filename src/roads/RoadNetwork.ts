@@ -114,7 +114,7 @@ export default class RoadNetwork {
       this.quadTransfArrY.push(transform[4], transform[5], transform[6], transform[7]);
       this.quadTransfArrZ.push(transform[8], transform[9], transform[10], transform[11]);
       this.quadTransfArrW.push(transform[12], transform[13], transform[14], transform[15]);
-      this.quadColorArr.push(0.2, 0.1, 0.2, 1);
+      this.quadColorArr.push(1.2, 1.2, 0.6, 1);
       this.numQuad++;
     }
 

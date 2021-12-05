@@ -18,10 +18,9 @@ import City from './City';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  numIter: 5,
-  axiom: "FFFFFFFFF^++A[//------FF++++B]-&&A///^^^A++",
-  angle: 16,
-  play: false
+  song: 'zombie',
+  numBlocks: 6,
+  blockSize: 1
 };
 
 let loader: THREE.AudioLoader = new THREE.AudioLoader();
@@ -44,9 +43,13 @@ let lsystem: LSystem;
 let time: number = 0.0;
 
 function loadSong(filename: string) {
-  loader.load(filename, function (buffer: any) {
+  if (audio.isPlaying) audio.stop();
+
+  var file = 'music/' + filename + '.mp3';
+  loader.load(file, function (buffer: any) {
     audio.setBuffer(buffer);
     audio.setLoop(true);
+    audio.play();
   });
 
   analyzer = new THREE.AudioAnalyser(audio, fftSize);
@@ -67,27 +70,9 @@ function readObj(filename: string) : string {
   return outstr;
 }
 
-function loadLSystem() {
-  let bananaObjStr: string = readObj("./banana.obj");
-  banana = new Mesh(bananaObjStr, vec3.fromValues(0, 0, 0));
-  banana.create();
-
-  let leafObjStr: string = readObj("./banana_leaf.obj");
-  leaf = new Mesh(leafObjStr, vec3.fromValues(0, 0, 0));
-  leaf.create();
-
-  cylinder = new Cylinder();
-  cylinder.create();
-
-  screenQuad = new ScreenQuad();
-  screenQuad.create();
-
-  lsystem = new LSystem(cylinder, leaf, banana, controls.axiom, controls.angle, controls.numIter);
-  lsystem.expand();
-  lsystem.draw();
-}
-
 function loadScene() {
+  loadSong(controls.song);
+
   square = new Square();
   square.create();
   cube = new Cube(vec3.fromValues(0, 0, 0), 1);
@@ -98,29 +83,10 @@ function loadScene() {
   city = new City(vec3.fromValues(0, 0, 0), 6, 1, cube, square);
   city.setSongAnalyzer(analyzer);
   city.update(0);
-  city.log();
-
-  /*
-  cube = new Cube(vec3.fromValues(0, 0, 0), 2);
-  cube.create();
-
-  let offsetsArray = [];
-  let colorsArray = [];
-  let n: number = 1;
-
-  for (let i = 0; i < n; i++) {
-    offsetsArray.push(i, i, 0);
-    colorsArray.push(1.0, 1.0, 1.0, 1.0);
-  }
-
-  let offsets: Float32Array = new Float32Array(offsetsArray);
-  let colors: Float32Array = new Float32Array(colorsArray);
-  square.setInstanceVBOs(offsets, colors);
-  square.setNumInstances(n);*/
 }
 
 function main() {
-  loadSong('music/zombie.mp3');
+  //loadSong('music/zombie.mp3');
 
   // Initial display for framerate
   const stats = Stats();
@@ -133,33 +99,23 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
 
-  const iterControl = gui.add(controls, 'numIter', 1, 8).step(1);
-  iterControl.onChange(function() {
-    lsystem.setAxiom(controls.axiom);
-    lsystem.setNumIter(controls.numIter);
-    lsystem.redraw();
-  });
-
-  const axiomControl = gui.add(controls, 'axiom');
-  axiomControl.onFinishChange(function() {
-    lsystem.setAxiom(controls.axiom);
-    lsystem.redraw();
-  });
-
-  const angleControl = gui.add(controls, 'angle', 10, 30).step(1);
-  angleControl.onFinishChange(function() {    
-    lsystem.setAxiom(controls.axiom);
-    lsystem.setAngle(controls.angle);
-    lsystem.redraw();
-  });
-
+  /*
   const playControl = gui.add(controls, 'play', false);
   playControl.onChange(function() {
     audio.play();  
     city.setSongAnalyzer(analyzer);
     city.update(0);
+  })*/
+
+  const songControl = gui.add(controls, 'song', ['zombie', 'truman', 'omg']);
+  songControl.onFinishChange(function() {
+    loadSong(controls.song);
+    city.setSongAnalyzer(analyzer);
+    city.update(0);
   })
 
+  var obj = { add:function(){ console.log("clicked") }};
+  gui.add(obj,'add');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -197,6 +153,7 @@ function main() {
     stats.begin();
     instancedShader.setTime(time);
     flat.setTime(time++);
+    instancedShader.setAvgFreq(analyzer.getAverageFrequency());
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
 

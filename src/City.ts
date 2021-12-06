@@ -10,7 +10,7 @@ export default class City {
   buildings: Building[][] = [];
   roads: RoadNetwork;
   roadWidth: number = 0.1;
-  roadPadding: number = 0.24;
+  roadPadding: number = 0.2;
 
   side: number;
   gridSize: number;

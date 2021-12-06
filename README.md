@@ -1,5 +1,8 @@
 # README
 
+## Demo
+Live demo [here](https://linda-ting.github.io/final-project/)!
+
 ## Design Doc
 
 ### Introduction
@@ -26,7 +29,6 @@ Here are a whole bunch of inspo images!
 ### Techniques:
 - [Shape grammars](https://www.gamedev.net/tutorials/programming/engines-and-middleware/procedural-modeling-of-buildings-with-shape-grammars-r4596/)/L systems for building and road footprints
 - FBM/Perlin noise for adjusting building heights
-- [Bloom](https://learnopengl.com/Advanced-Lighting/Bloom) for neon lighting effects
 
 ### Design:
 ![](img/diagram.jpg)
@@ -47,7 +49,12 @@ Here are a whole bunch of inspo images!
   - Customize lighting setup
   - Stylize colors
 
-## Milestone 1: 
-Submission: Add a new section to your README titled: Milestone #1, which should include
-- written description of progress on your project goals. If you haven't hit all your goals, what's giving you trouble?
-- Examples of your generators output so far
+## Output:
+Below are screenshots of generated visualizer cities of different sizes.
+
+![](img/size2.png)
+![](img/size10.png)
+![](img/size32.png)
+
+## Post Mortem
+One major feature that I was not able to implement was an interesting shape grammar to make the city buildings more varied and interesting. This would definitely be a fun point of future work! In the meantime, I think having a large enough city with buildings of different footprints achieves a similar enough effect. I accomplished all of the basic goals of my generator, but if given the opportunity I would want to work more on beautifying and stylizing a bit more. 

@@ -18,7 +18,7 @@ import City from './City';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   song: 'zombie',
-  citySize: 20,
+  citySize: 6,
   blockSize: 1
 };
 
@@ -105,7 +105,7 @@ function main() {
     city.setSongAnalyzer(analyzer);
     city.update(0);
   });
-  
+
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
@@ -121,8 +121,8 @@ function main() {
   loadScene();
   //loadLSystem();
 
-  const cameraPos: vec3 = vec3.fromValues(11, 6, 11);
-  const camera = new Camera(cameraPos, vec3.fromValues(0, 1, 0));
+  const cameraPos: vec3 = vec3.fromValues(11, 7, 11);
+  const camera = new Camera(cameraPos, vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.9, 0.72, 0, 1);

@@ -70,7 +70,7 @@ void main()
   mat4 transform = mat4(vs_Transform1, vs_Transform2, vs_Transform3, vs_Transform4);
   fs_Pos = transform * vs_Pos;
 
-  float xz = 0.4 * gain(u_AvgFreq / 255.0, 0.75) + 0.8;
+  float xz = 0.08 * gain(u_AvgFreq / 255.0, 0.75) + 0.8;
   float y = 0.1 * worley(fs_Pos.xxz) + 0.8;
   fs_Pos = fs_Pos * vec4(vec3(xz, y, xz), 1.0);
 
@@ -79,9 +79,10 @@ void main()
                        0, 1, 0, 0,
                        -sin(theta), 0, cos(theta), 0,
                        0, 0, 0, 1);
-  fs_Pos = rotation * fs_Pos;
+  //fs_Pos = rotation * fs_Pos;
 
-  vec3 newNor = (rotation * transform * vs_Nor).xyz;
+  //vec3 newNor = (rotation * transform * vs_Nor).xyz;
+  vec3 newNor = (transform * vs_Nor).xyz;
   fs_Nor = vec4(normalize(newNor), 1);
   fs_Col = vs_Col;
   fs_LightVec = lightPos - fs_Pos;

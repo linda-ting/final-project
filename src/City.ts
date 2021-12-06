@@ -1,4 +1,5 @@
 import {vec3, vec2, mat4, vec4} from 'gl-matrix';
+import { Z_ASCII } from 'zlib';
 import Building from './Buildings/Building';
 import Cube from './geometry/Cube';
 import Square from './geometry/Square';
@@ -9,6 +10,7 @@ export default class City {
   buildings: Building[][] = [];
   roads: RoadNetwork;
   roadWidth: number = 0.1;
+  roadPadding: number = 0.2;
 
   side: number;
   gridSize: number;
@@ -44,6 +46,7 @@ export default class City {
     this.maxIndex = side / gridSize;
     this.cube = cube;
     this.square = square;
+    this.buildings = [];
 
     this.baseColor = vec4.fromValues(0.8, 1.2, 1.0, 1);
     this.roadColor = vec4.fromValues(1.3, 1.3, 1.1, 1);
@@ -69,9 +72,9 @@ export default class City {
     for (var i = 0; i < this.maxIndex; i++) {
       this.buildings[i] = [];
       for (var j = 0; j < this.maxIndex; j++) {
-        let dims: vec3 = vec3.fromValues(this.gridSize - 0.4,
+        let dims: vec3 = vec3.fromValues(this.gridSize - 2 * this.roadPadding,
                                          1.3 * this.gain(this.fbm(i, j), 0.55),
-                                         this.gridSize - 0.4);
+                                         this.gridSize - 2 * this.roadPadding);
         let corner: vec3 = vec3.fromValues((i - centerIdx) * this.gridSize,
                                            0,
                                            (j - centerIdx) * this.gridSize);
@@ -96,7 +99,12 @@ export default class City {
           for (var x = 0; x < xSize; x++) {
             let start: vec2 = vec2.fromValues(i + x + xSize, j);
             let end: vec2 = vec2.fromValues(i + x + xSize, j + 1);
-            if (this.roads.exists(start, end)) {
+
+            let xCheck = i + x + xSize;
+            let zCheck = j + zSize;
+            let buildingExists = this.buildingExists(xCheck, zCheck, i, j);
+
+            if (this.roads.exists(start, end) || buildingExists) {
               xExpand = false;
               break;
             }
@@ -106,20 +114,25 @@ export default class City {
           for (var z = 0; z < zSize; z++) {
             let start: vec2 = vec2.fromValues(i, j + z + zSize);
             let end: vec2 = vec2.fromValues(i + 1, j + z + zSize);
-            if (this.roads.exists(start, end)) {
+
+            let xCheck = i + xSize;
+            let zCheck = j + z + zSize;
+            let buildingExists = this.buildingExists(xCheck, zCheck, i, j);
+
+            if (this.roads.exists(start, end) || buildingExists) {
               zExpand = false;
               break;
             }
           }
 
-          if (Math.random() < 0.5) break;
+          if (Math.pow(Math.random(), xSize + zSize) < 0.7) break;
           if (xExpand) xSize++;
           if (zExpand) zSize++;
         }
 
         // expand building footprint
-        let newWidth = xSize * this.gridSize - 0.4;
-        let newDepth = zSize * this.gridSize - 0.4;
+        let newWidth = xSize * this.gridSize - 2 * this.roadPadding;
+        let newDepth = zSize * this.gridSize - 2 * this.roadPadding;
         this.buildings[i][j].setFootprint(newWidth, newDepth);
 
         // erase overlapped buildings
@@ -128,14 +141,10 @@ export default class City {
           for (var z = 0; z < zSize; z++) {
             if (x == 0 && z == 0) continue;
             this.buildings[i + x][j + z] = null;
-            //console.log("x", x, "z", z);
-            //console.log("erasing building", i + x, j + z, "bc of expanded" , i, j);
           }
         }
 
-        // TODO check for intersecting buildings
-
-        console.log("expanded building", i, j, " by ", xSize, zSize);
+        //console.log("expanded building", i, j, " by ", xSize, zSize);
       }
     }
 
@@ -149,8 +158,38 @@ export default class City {
     }
   }
 
-  reset() {
+  buildingExists(x: number, z: number, thisI: number, thisJ: number): boolean {    
+    if (x < 0 || x > this.maxIndex || z < 0 || z > this.maxIndex) return false;
 
+    let diff = Math.floor(this.maxIndex / 2);
+    
+    for (var i = 0; i <= x && i < this.maxIndex; i++) {
+      for (var j = 0; j <= z && j < this.maxIndex; j++) {
+        if (i == thisI && j == thisJ) continue;
+
+        let building = this.buildings[i][j];
+        if (building == null) continue;
+
+        let start = vec3.clone(building.corner);
+        vec3.add(start, start, [diff, 0, diff]);
+
+        let dims = vec3.create();
+        vec3.add(dims, building.dimensions, [2 * this.roadPadding, 0, 2 * this.roadPadding]);
+        vec3.divide(dims, dims, [this.gridSize, 1, this.gridSize]);
+
+        let notExpanded = dims[0] == 1 && dims[2] == 1;
+        if (notExpanded) continue;
+
+        let end = vec3.create();
+        vec3.add(end, start, dims);
+
+        if (start[0] <= x && end[0] >= x && start[2] <= z && end[2] >= z) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   setSongAnalyzer(analyzer: THREE.AudioAnalyser) {

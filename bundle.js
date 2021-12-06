@@ -6135,7 +6135,7 @@ function main() {
     document.body.appendChild(stats.domElement);
     // Add controls to the gui
     const gui = new __WEBPACK_IMPORTED_MODULE_2_dat_gui__["GUI"]();
-    const songControl = gui.add(controls, 'song', ['zombie', 'truman', 'omg']);
+    const songControl = gui.add(controls, 'song', ['zombie', 'truman', 'pizza', 'thirst', 'thor']);
     songControl.onFinishChange(function () {
         loadSong(controls.song);
         city.setSongAnalyzer(analyzer);
@@ -66423,7 +66423,7 @@ class City {
     constructor(center, side, gridSize, cube, square) {
         this.buildings = [];
         this.roadWidth = 0.1;
-        this.roadPadding = 0.2;
+        this.roadPadding = 0.24;
         this.fftSize = 64;
         this.cubeTransfArrX = [];
         this.cubeTransfArrY = [];
@@ -66994,7 +66994,7 @@ module.exports = "#version 300 es\n\nuniform mat4 u_ViewProj;\nuniform float u_T
 /* 77 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\nin vec4 fs_Nor;\nin vec4 fs_LightVec;\n\nout vec4 out_Col;\n\nvoid main()\n{\n  out_Col = fs_Col;\n\n  // Material base color (before shading)\n  vec4 diffuseColor = fs_Col;\n\n  // Calculate the diffuse term for Lambert shading\n  float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));\n  // Avoid negative lighting values\n  diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);\n\n  float ambientTerm = 0.2;\n\n  float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier\n                                                      //to simulate ambient lighting. This ensures that faces that are not\n                                                      //lit by our point light are not completely black.\n\n  // Compute final shaded color\n  out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);\n}\n"
+module.exports = "#version 300 es\nprecision highp float;\n\nuniform float u_Time;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\nin vec4 fs_Nor;\nin vec4 fs_LightVec;\n\nout vec4 out_Col;\n\nfloat noise(vec2 p) {\n\treturn fract(sin(dot(p, vec2(127.1, 244.1))) * 1288.002);\n}\n\nfloat surflet(vec2 p, vec2 gridPoint) {\n  vec2 t2 = abs(p - gridPoint);\n  vec2 t = vec2(1.0) - 6.0 * pow(t2, vec2(5.0)) + 15.0 * pow(t2, vec2(4.0)) - 10.0 * pow(t2, vec2(3.0));\n  vec2 gradient = noise(gridPoint) * 2.0 - vec2(1.0);\n  vec2 diff = p - gridPoint;\n  float height = dot(diff, gradient);\n  return height * t.x * t.y;\n}\n\nfloat perlin(vec2 p) {\n\tfloat surfletSum = 0.f;\n\tfor(int dx = 0; dx <= 1; ++dx) {\n\t\tfor(int dy = 0; dy <= 1; ++dy) {\n\t\t\t\tsurfletSum += surflet(p, floor(p) + vec2(dx, dy));\n\t\t}\n\t}\n\treturn surfletSum;\n}\n\nvoid main()\n{\n  out_Col = fs_Col;\n\n  float t = perlin(0.1 * fs_Pos.xz + vec2(pow(0.0001 * u_Time, 5.0), pow(sin(-0.0005 * u_Time), 3.0)));\n\n  // Material base color (before shading)\n  vec4 diffuseColor = fs_Col * vec4(1.0 + t, 1.0 + t, 1.0 - t, 1.0);\n\n  // Calculate the diffuse term for Lambert shading\n  float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));\n  // Avoid negative lighting values\n  diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);\n\n  float ambientTerm = 0.2;\n\n  float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier\n                                                      //to simulate ambient lighting. This ensures that faces that are not\n                                                      //lit by our point light are not completely black.\n\n  // Compute final shaded color\n  out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);\n}\n"
 
 /***/ }),
 /* 78 */

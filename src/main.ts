@@ -92,7 +92,7 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
 
-  const songControl = gui.add(controls, 'song', ['zombie', 'truman', 'omg']);
+  const songControl = gui.add(controls, 'song', ['zombie', 'truman', 'pizza', 'thirst', 'thor']);
   songControl.onFinishChange(function() {
     loadSong(controls.song);
     city.setSongAnalyzer(analyzer);

@@ -66423,7 +66423,7 @@ class City {
     constructor(center, side, gridSize, cube, square) {
         this.buildings = [];
         this.roadWidth = 0.1;
-        this.roadPadding = 0.24;
+        this.roadPadding = 0.2;
         this.fftSize = 64;
         this.cubeTransfArrX = [];
         this.cubeTransfArrY = [];

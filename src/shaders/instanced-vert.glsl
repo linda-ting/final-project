@@ -79,10 +79,9 @@ void main()
                        0, 1, 0, 0,
                        -sin(theta), 0, cos(theta), 0,
                        0, 0, 0, 1);
-  //fs_Pos = rotation * fs_Pos;
+  fs_Pos = rotation * fs_Pos;
 
-  //vec3 newNor = (rotation * transform * vs_Nor).xyz;
-  vec3 newNor = (transform * vs_Nor).xyz;
+  vec3 newNor = (rotation * transform * vs_Nor).xyz;
   fs_Nor = vec4(normalize(newNor), 1);
   fs_Col = vs_Col;
   fs_LightVec = lightPos - fs_Pos;

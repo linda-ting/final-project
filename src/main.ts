@@ -18,7 +18,7 @@ import City from './City';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   song: 'zombie',
-  citySize: 6,
+  citySize: 32,
   blockSize: 1
 };
 

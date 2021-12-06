@@ -1,4 +1,4 @@
-import {vec3, vec2, mat4} from 'gl-matrix';
+import {vec3, vec2, mat4, vec4} from 'gl-matrix';
 import Building from './Buildings/Building';
 import Cube from './geometry/Cube';
 import Square from './geometry/Square';
@@ -29,6 +29,13 @@ export default class City {
 
   square: Square;
 
+  baseColor: vec4 = vec4.create();
+  roadColor: vec4 = vec4.create();
+  buildingColor: vec3 = vec3.create();
+  colorA: vec3 = vec3.create();
+  colorB: vec3 = vec3.create();
+  colorC: vec3 = vec3.create();
+  colorD: vec3 = vec3.create();
 
   constructor(center: vec3, side: number, gridSize: number, cube: Cube, square: Square) {
     this.center = center;
@@ -38,8 +45,16 @@ export default class City {
     this.cube = cube;
     this.square = square;
 
+    this.baseColor = vec4.fromValues(0.8, 1.2, 1.0, 1);
+    this.roadColor = vec4.fromValues(1.3, 1.3, 1.1, 1);
+    this.colorA = vec3.fromValues(0.838, 0.408, 1.078);
+    this.colorB = vec3.fromValues(0.218, -0.362, 0.438);
+    this.colorC = vec3.fromValues(-0.802, 0.858, 1.158);
+    this.colorD = vec3.fromValues(-1.052, -0.892, -0.642);
+    this.buildingColor = vec3.fromValues(0.6, 0.5, 0.3);
+
     // create roads
-    this.roads = new RoadNetwork(side, gridSize, square);
+    this.roads = new RoadNetwork(side, gridSize, square, this.roadColor);
     this.roads.render();
     this.roads.log();
 
@@ -174,7 +189,7 @@ export default class City {
     this.cubeTransfArrY.push(baseTransform[4], baseTransform[5], baseTransform[6], baseTransform[7]);
     this.cubeTransfArrZ.push(baseTransform[8], baseTransform[9], baseTransform[10], baseTransform[11]);
     this.cubeTransfArrW.push(baseTransform[12], baseTransform[13], baseTransform[14], baseTransform[15]);
-    this.cubeColorArr.push(0.2, 0.2, 0.2, 1);
+    this.cubeColorArr.push(this.baseColor[0], this.baseColor[1], this.baseColor[2], this.baseColor[3]);
     this.numCube++;
 
     // buildings
@@ -189,7 +204,10 @@ export default class City {
         this.cubeTransfArrY.push(transform[4], transform[5], transform[6], transform[7]);
         this.cubeTransfArrZ.push(transform[8], transform[9], transform[10], transform[11]);
         this.cubeTransfArrW.push(transform[12], transform[13], transform[14], transform[15]);
-        this.cubeColorArr.push(1.5 * i / this.maxIndex, 1.5 * j / this.maxIndex, 1, 1);
+        let t = 100 * this.fbm(j, i);
+        let color: vec3 = this.palette(t, this.colorA, this.colorB, this.colorC, this.colorD);
+        vec3.multiply(color, [1.5, 1.0, 1.2], color);
+        this.cubeColorArr.push(color[0], i / this.maxIndex + color[1], 0.3 * j / this.maxIndex + color[2], 1.0);
         this.numCube++;
       }
     }
@@ -208,15 +226,16 @@ export default class City {
   }
 
   noise(p: vec2): number {
-    let n = Math.abs((Math.sin(vec2.dot(p, vec2.fromValues(127.1, 311.7))) * 1288.002) % 1);
+    let n = Math.abs((Math.sin(vec2.dot(p, vec2.fromValues(127.1, 311.7))) * 1288.002) % 1.0);
+    if (n > 1) console.log("n " + n);
     return n;
   }
 
   interpNoise(x: number, y: number): number {
     let intX = Math.floor(x);
-    let fractX = x % 1;
+    let fractX = x % 1.0;
     let intY = Math.floor(y);
-    let fractY = y % 1;
+    let fractY = y % 1.0;
   
     let v1 = this.noise(vec2.fromValues(intX, intY));
     let v2 = this.noise(vec2.fromValues(intX + 1, intY));
@@ -230,11 +249,8 @@ export default class City {
   }
 
   fbm(x: number, y: number) {
-    x *= 10;
-    y *= 10;
-
     let total: number = 0;
-    let persistence: number = 0.72;
+    let persistence: number = 0.78;
     let octaves: number = 4;
   
     for(var i = 1; i <= octaves; i++) {
@@ -257,5 +273,13 @@ export default class City {
       return this.bias(time * 2.0, gain) / 2.0;
     else
       return this.bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
+  }
+
+  palette(t: number, a: vec3, b: vec3, c: vec3, d: vec3) 
+  {
+    let red = a[0] + b[0] * Math.cos(Math.PI * 1.0 * (c[0] * t + d[0]));
+    let green = a[1] + b[1] * Math.cos(Math.PI * 1.0 * (c[1] * t + d[1]));
+    let blue = a[2] + b[2] * Math.cos(Math.PI * 1.0 * (c[2] * t + d[2]));
+    return vec3.fromValues(red, green, blue);
   }
 }

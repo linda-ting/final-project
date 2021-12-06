@@ -1,6 +1,6 @@
 import { Console } from 'console';
 import { timingSafeEqual } from 'crypto';
-import {vec3, mat4, vec2} from 'gl-matrix';
+import {vec3, mat4, vec4, vec2} from 'gl-matrix';
 import Square from '../geometry/Square';
 import RoadSegment from './RoadSegment';
 
@@ -19,11 +19,14 @@ export default class RoadNetwork {
   quadColorArr: number[] = [];
   numQuad: number = 0;
 
-  constructor(side: number, gridSize: number, square: Square) {
+  color: vec4 = vec4.create();
+
+  constructor(side: number, gridSize: number, square: Square, color: vec4) {
     this.side = side;
     this.maxIndex = side / gridSize;
     this.gridSize = gridSize;
     this.square = square;
+    this.color = color;
 
     /*
     // initialize road grid
@@ -114,7 +117,7 @@ export default class RoadNetwork {
       this.quadTransfArrY.push(transform[4], transform[5], transform[6], transform[7]);
       this.quadTransfArrZ.push(transform[8], transform[9], transform[10], transform[11]);
       this.quadTransfArrW.push(transform[12], transform[13], transform[14], transform[15]);
-      this.quadColorArr.push(1.2, 1.2, 0.6, 1);
+      this.quadColorArr.push(this.color[0], this.color[1], this.color[2], this.color[3]);
       this.numQuad++;
     }
 

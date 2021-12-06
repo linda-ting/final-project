@@ -132,7 +132,7 @@ function main() {
   loadScene();
   //loadLSystem();
 
-  const camera = new Camera(vec3.fromValues(3, 7, 8), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(3, 8, 8), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.9, 0.72, 0, 1);

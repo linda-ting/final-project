@@ -36,6 +36,12 @@ class Camera {
     vec3.normalize(this.right, this.right);
   }
 
+  setPosition(position: vec3) {
+    this.position = position;
+    this.controls.position = position;
+    this.updateProjectionMatrix();
+  }
+
   setAspectRatio(aspectRatio: number) {
     this.aspectRatio = aspectRatio;
   }

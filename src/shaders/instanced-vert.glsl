@@ -22,7 +22,7 @@ out vec4 fs_Pos;
 out vec4 fs_Nor;
 out vec4 fs_LightVec;
 
-const vec4 lightPos = vec4(5, 15, 10, 1);
+const vec4 lightPos = vec4(8, 15, 8, 1);
 
 vec3 random3(vec3 p) {
 	return fract(sin(vec3(
@@ -74,7 +74,14 @@ void main()
   float y = 0.1 * worley(fs_Pos.xxz) + 0.8;
   fs_Pos = fs_Pos * vec4(vec3(xz, y, xz), 1.0);
 
-  vec3 newNor = (transform * vs_Nor).xyz;
+  float theta = u_Time * 0.001;
+  mat4 rotation = mat4(cos(theta), 0, sin(theta), 0,
+                       0, 1, 0, 0,
+                       -sin(theta), 0, cos(theta), 0,
+                       0, 0, 0, 1);
+  fs_Pos = rotation * fs_Pos;
+
+  vec3 newNor = (rotation * transform * vs_Nor).xyz;
   fs_Nor = vec4(normalize(newNor), 1);
   fs_Col = vs_Col;
   fs_LightVec = lightPos - fs_Pos;

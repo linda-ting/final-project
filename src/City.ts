@@ -56,7 +56,6 @@ export default class City {
     // create roads
     this.roads = new RoadNetwork(side, gridSize, square, this.roadColor);
     this.roads.render();
-    this.roads.log();
 
     // create buildings
     this.init();
@@ -64,6 +63,8 @@ export default class City {
 
   init() {
     // initialize buildings
+    this.buildings = [];
+
     let centerIdx: number = this.maxIndex / 2.0;
     for (var i = 0; i < this.maxIndex; i++) {
       this.buildings[i] = [];
@@ -204,10 +205,10 @@ export default class City {
         this.cubeTransfArrY.push(transform[4], transform[5], transform[6], transform[7]);
         this.cubeTransfArrZ.push(transform[8], transform[9], transform[10], transform[11]);
         this.cubeTransfArrW.push(transform[12], transform[13], transform[14], transform[15]);
-        let t = 100 * this.fbm(j, i);
+        let t = 200 * this.fbm(j, i);
         let color: vec3 = this.palette(t, this.colorA, this.colorB, this.colorC, this.colorD);
-        vec3.multiply(color, [1.5, 1.0, 1.2], color);
-        this.cubeColorArr.push(color[0], i / this.maxIndex + color[1], 0.3 * j / this.maxIndex + color[2], 1.0);
+        vec3.multiply(color, [1.4, 1.6, 1.0], color);
+        this.cubeColorArr.push(color[0], 0.3 * i / this.maxIndex + color[1], 0.3 * (1 - j / this.maxIndex) + color[2], 1.0);
         this.numCube++;
       }
     }

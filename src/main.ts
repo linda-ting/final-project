@@ -11,7 +11,6 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
-import LSystem from './lsystem/LSystem'
 import RoadNetwork from './roads/RoadNetwork';
 import City from './City';
 
@@ -19,14 +18,14 @@ import City from './City';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   song: 'zombie',
-  numBlocks: 6,
+  citySize: 20,
   blockSize: 1
 };
 
 let loader: THREE.AudioLoader = new THREE.AudioLoader();
 let listener: THREE.AudioListener = new THREE.AudioListener();
 let audio: THREE.Audio = new THREE.Audio(listener);
-let fftSize: number = 128;
+let fftSize: number = 2048;
 let analyzer: THREE.AudioAnalyser;
 let songData: Uint8Array;
 
@@ -36,10 +35,6 @@ let roads: RoadNetwork;
 let cube: Cube;
 let square: Square;
 let screenQuad: ScreenQuad;
-let cylinder: Cylinder;
-let leaf: Mesh;
-let banana: Mesh;
-let lsystem: LSystem;
 let time: number = 0.0;
 
 function loadSong(filename: string) {
@@ -80,14 +75,12 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  city = new City(vec3.fromValues(0, 0, 0), 6, 1, cube, square);
+  city = new City(vec3.fromValues(0, 0, 0), controls.citySize, controls.blockSize, cube, square);
   city.setSongAnalyzer(analyzer);
   city.update(0);
 }
 
 function main() {
-  //loadSong('music/zombie.mp3');
-
   // Initial display for framerate
   const stats = Stats();
   stats.setMode(0);
@@ -99,24 +92,20 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
 
-  /*
-  const playControl = gui.add(controls, 'play', false);
-  playControl.onChange(function() {
-    audio.play();  
-    city.setSongAnalyzer(analyzer);
-    city.update(0);
-  })*/
-
   const songControl = gui.add(controls, 'song', ['zombie', 'truman', 'omg']);
   songControl.onFinishChange(function() {
     loadSong(controls.song);
     city.setSongAnalyzer(analyzer);
     city.update(0);
-  })
+  });
 
-  var obj = { add:function(){ console.log("clicked") }};
-  gui.add(obj,'add');
-
+  const citySizeControl = gui.add(controls, 'citySize').min(1).max(32).step(1);
+  citySizeControl.onChange(function() {
+    city = new City(vec3.fromValues(0, 0, 0), controls.citySize, controls.blockSize, cube, square);
+    city.setSongAnalyzer(analyzer);
+    city.update(0);
+  });
+  
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
@@ -132,7 +121,8 @@ function main() {
   loadScene();
   //loadLSystem();
 
-  const camera = new Camera(vec3.fromValues(3, 8, 8), vec3.fromValues(0, 0, 0));
+  const cameraPos: vec3 = vec3.fromValues(11, 6, 11);
+  const camera = new Camera(cameraPos, vec3.fromValues(0, 1, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.9, 0.72, 0, 1);
